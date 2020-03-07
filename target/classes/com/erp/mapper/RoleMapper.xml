@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.RoleMapper">
+<!--    List<Role>page(@Param("startNum") int startNum,@Param("pageSize") int pageSize );-->
+<select id="page" resultType="com.erp.pojo.Role">
+    select *from `role`
+    <where>
+    <if test="wheres.name!=null and wheres.name!=''">
+    and `name` like '%${wheres.name}%'
+    </if>
+    </where>
+    order by id desc
+    limit #{startNum},#{pageSize}
+</select>
+    <insert id="add">
+        insert into `role` (`name`) values (#{role.name})
+    </insert>
+    <update id="update">
+        update `role` set `name`=#{role.name} where id=#{role.id}
+    </update>
+    <delete id="remove">
+        delete from `role` where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    <select id="findById" resultType="com.erp.pojo.Role">
+      select * from `role` where id=#{id};
+    </select>
+    <select id="count" resultType="int">
+         select count(*) from `role`
+         <where>
+        <if test="wheres.name!=null and wheres.name!=''">
+            and `name` like '%${wheres.name}%'
+        </if>
+         </where>
+    </select>
+    <select id="findAll" resultType="com.erp.pojo.Role">
+        select * from `role`
+    </select>
+    <select id="findPermissionIdsByRoleId" resultType="int">
+        SELECT rpm.permission_id FROM role_permission rpm WHERE role_id=#{roleId};
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,432 @@
+<div class="easyui-layout" data-options="fit:true">
+    <!-- Begin of toolbar -->
+    <div id="wu-toolbar-role">
+        <div class="wu-toolbar-button">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="openAdd()" plain="true">添加</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="openEdit()" plain="true">修改</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="remove()" plain="true">删除</a>
+
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="openPermission()" plain="true">权限设置</a>
+<!--          javascript:void(0)取消超链接的功能 不跳转了-->
+<!--            <a href="#" class="easyui-linkbutton" iconCls="icon-reload" onclick="reload()" plain="true">刷新</a>-->
+
+        </div>
+                <div class="wu-toolbar-search">
+                    <label>部门名称：</label><input class="wu-text" style="width:100px" id="name">
+
+                    <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="roleSearch">开始检索</a>
+                    <script>
+                        $(function () {
+                            $("#roleSearch").click(function () {
+                                //当点击此按钮时，附带参数重载数据 表格 参数json
+                                //也附带页码
+                                $("#wu-datagrid-role").datagrid('load',{//自动从数据请求的ajax地址重新加载数据 附带把参数传进去
+                                    pageNum:$("#wu-datagrid-role").datagrid("options").pageNumber,
+                                    pageSize:$("#wu-datagrid-role").datagrid("options").pageSize,
+                                    name:$("#name").val()
+                                });
+                                console.log($("#name").val());
+
+                            })
+                        })
+
+
+
+                    </script>
+                </div>
+    </div>
+    <!-- End of toolbar -->
+    <table id="wu-datagrid-role" class="easyui-datagrid" toolbar="#wu-toolbar-role"></table>
+</div>
+<!-- Begin of easyui-dialog -->
+<div id="wu-dialog-role" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="width:400px; padding:10px;">
+    <form id="wu-form-role" method="post">
+        <!--        隐藏的id做修改时要传到后台-->
+        <input type="hidden" name="id" class="wu-text" />
+        <table>
+            <tr>
+                <td width="160" align="right">职位名称:</td>
+                <td><input type="text" name="name" class="wu-text" /></td>
+            </tr>
+
+            <!--            <tr>-->
+            <!--                <td align="right">主 题:</td>-->
+            <!--                <td><input type="text" name="subject" class="wu-text" /></td>-->
+            <!--            </tr>-->
+            <!--            <tr>-->
+            <!--                <td valign="top" align="right">内 容:</td>-->
+            <!--                <td><textarea name="content" rows="6" class="wu-textarea" style="width:260px"></textarea></td>-->
+            <!--            </tr>-->
+        </table>
+    </form>
+
+</div>
+<!--    权限模态框-->
+<div id="dialog-permission" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="width:400px; padding:10px;">
+    <!--树形权限列表-->
+    <ul id="permission"></ul>
+</div>
+<script type="text/javascript">
+    /**
+     * 先给权限tree设置结构
+     */
+    $(function () {
+        $('#permission').tree({
+            url:'role/permissionList'//ajax的路径
+            ,checkbox:true
+        });
+    })
+
+</script>
+
+
+
+
+
+
+
+<!-- End of easyui-dialog -->
+<script type="text/javascript">
+
+    /**
+     * Name 打开权限窗口
+     */
+    //跟add和修改一样，弹出一个模态框,
+    function openPermission(){
+        $('#permission').tree("reload");
+        var items=$('#wu-datagrid-role').datagrid('getSelections');
+        console.log(items);
+        if (items.length==0){
+            //请选择要修改的数据--没有任何效果
+            $.messager.alert('信息提示','请选择要设置权限的职位！','warning');
+            return;
+
+        }else if(items.length>1){
+            //提示一次只能修改一次数据
+            $.messager.alert('信息提示','一次只能设置一个职位的权限！','warning');
+            return;
+
+        }
+        //直接给表单进行回显 使用勾选中的data
+        // $('#wu-form-role').form('load',items[0]);
+
+        // alert(item.productid);return;
+        $.ajax({//ajax回显
+            url:'role/findPermissionIdsByRoleId',//提交路径 dept/findById
+            data:{roleId:items[0].id},//提交的数据
+            success:function(data){//成功回调函数 data 响应的 数据
+                $.each(data,function () {
+                    $('#permission').tree('check',$('#permission').tree('find',this).target);
+
+
+console.log(data);
+                })
+            }
+        });
+
+//easyui的表单功能--清楚表单数据
+//         $('#dialog-permission').form('clear');
+//easyui的dialog功能--把第为wu-dialog-role的组件作为easyuid的窗口来定义了
+        $('#dialog-permission').dialog({
+//false 不关闭--显示窗口
+            closed: false,
+//定义窗口是不是模态窗口。true是false不是
+//窗口模态: 当展示该窗口时，只能操作该窗口的内容，其他地方无法操作（无法获取焦点）
+            modal:true,
+// 窗口的标题文本
+            title: "权限设置",
+//数组，按钮 每一个按钮有json对象来定义
+            buttons: [{//确定按钮
+                text: '确定',
+                iconCls: 'icon-ok',//class
+                handler: changePermission//类型function，用于处理点击该 图标以后的动作 相当于onclick
+            }, {//取消按钮
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+
+//关闭 模态框
+                    $('#dialog-permission').dialog('close');
+                    console.log("关闭");
+                }
+            }]
+        });
+    }
+    function changePermission() {
+        $.messager.confirm('信息提示', '确定修改此权限吗?', function () {
+            //先获取roleId
+            var roleId = $('#wu-datagrid-role').datagrid('getSelected').id;
+
+            //在获取所有的permission的id
+            var nodes = $('#permission').tree('getChecked');
+            console.log(nodes);
+            var permIds = [];
+            $.each(nodes, function () {
+                permIds.push(this.id);
+
+            });
+            console.log(roleId);
+
+
+            //ajax进行修改
+            $.ajax({
+                url: 'role/updatePerm'
+                , traditional: true//在servlet中这个属性默认是false 在传递数组是不允许绑定的 该为true
+
+                , data: {
+                    roleId: roleId,
+                    permIds: permIds
+                }
+                , success: function (data) {
+                    if (data) {
+                        $.messager.alert('信息提示', '权限修改成功!', 'info');
+                        console.log(2);
+                    }
+
+
+                }
+
+
+            });
+            console.log(3);
+            console.log(permIds);
+        });
+    }
+    /**
+     * f
+     * Name 添加记录
+     */
+    function add(){
+        $('#wu-form-role').form('submit', {
+            url:'role/add',//提交的路径 dept/add
+            success:function(data){//提交成功之后的回调函数 data返回的数据 true
+                if(data=='true'){
+                    $.messager.alert('信息提示','提交成功！','info',function () {
+                        //当窗口关闭时触发该函数--更新表格
+                        $('#wu-datagrid-role').datagrid('reload');
+                    });
+                    $('#wu-dialog-role').dialog('close');
+                }
+                else
+                {
+                    $.messager.alert('信息提示','提交失败！','info');
+                }
+            }
+        });
+    }
+
+    /**
+     * Name 修改记录
+     */
+    function edit(){
+        $('#wu-form-role').form('submit', {
+            url:'role/update',//修改路径
+            success:function(data){//响应数据
+                if(data=='true'){
+                    $.messager.alert('信息提示','提交成功！','info',function () {
+                        //当窗口关闭时触发该函数--更新表格
+                        $('#wu-datagrid-role').datagrid('reload')
+                    });
+                    $('#wu-dialog-role').dialog('close');
+
+
+
+                }
+                else
+                {
+                    $.messager.alert('信息提示','提交失败！','info');
+                }
+            }
+        });
+    }
+
+    /**
+     * Name 删除记录
+     */
+    function remove(){
+        var items = $('#wu-datagrid-role').datagrid('getSelections');
+        if(items.length==0){
+            return;
+        }
+
+
+        $.messager.confirm('信息提示','确定要删除该记录？', function(result){//当点击确定时
+            if(result){
+                // var items = $('#wu-datagrid-role').datagrid('getSelections');
+                // 获取要删除的所有id
+                var ids = [];
+                $(items).each(function(){
+                    ids.push(this.id);//数组的每一页 item把选中的行的id加入到ids数组中
+                });
+                //alert(ids);return;
+                console.log(ids);
+                $.ajax({
+                    url:'role/remove',//dept/remove
+                    //ajax当请求参数是一个数组的时候，需要设置
+
+                    traditional:true,//在servlet中这个属性默认是false 在传递数组是不允许绑定的 该为true
+                    data:{ids:ids},//ids是name ids是个数组值
+                    success:function(data){
+                        if(data){
+                            $.messager.alert('信息提示','删除成功！','info',function () {
+                                //当窗口关闭时触发该函数--更新表格
+                                $('#wu-datagrid-role').datagrid('reload')
+                            });
+                        }
+                        else
+                        {
+                            $.messager.alert('信息提示','删除失败！','info');
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Name 打开添加窗口
+     */
+    function openAdd(){
+
+        //easyui的表单功能--清楚表单数据
+        $('#wu-form-role').form('clear');
+        //easyui的dialog功能--把第为wu-dialog-role的组件作为easyuid的窗口来定义了
+        $('#wu-dialog-role').dialog({
+            //false 不关闭--显示窗口
+            closed: false,
+            //定义窗口是不是模态窗口。true是false不是
+            //窗口模态: 当展示该窗口时，只能操作该窗口的内容，其他地方无法操作（无法获取焦点）
+            modal:true,
+            // 窗口的标题文本
+            title: "添加信息",
+            //数组，按钮 每一个按钮有json对象来定义
+            buttons: [{//确定按钮
+                text: '确定',
+                iconCls: 'icon-ok',//class
+                handler: add//类型function，用于处理点击该 图标以后的动作 相当于onclick
+            }, {//取消按钮
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+
+                    //关闭 模态框
+                    $('#wu-dialog-role').dialog('close');
+                }
+            }]
+        });
+    }
+
+    /**
+     * Name 打开修改窗口
+     */
+    function openEdit(){
+        $('#wu-form-role').form('clear');
+        //getSelections none 返回所有选中的行，当没有选中的记录时，将返回空数组。
+        // var item = $('#wu-datagrid-role').datagrid('getSelected');
+        var items=$('#wu-datagrid-role').datagrid('getSelections');
+        console.log(items);
+        if (items.length==0){
+            //请选择要修改的数据--没有任何效果
+            $.messager.alert('信息提示','请选择要修改的数据！','warning');
+            return;
+
+        }else if(items.length>1){
+            //提示一次只能修改一次数据
+            $.messager.alert('信息提示','一次修改一条数据！','warning');
+            return;
+
+        }
+        //直接给表单进行回显 使用勾选中的data
+        // $('#wu-form-role').form('load',items[0]);
+
+        // alert(item.productid);return;
+        $.ajax({//ajax回显
+            url:'role/findById',//提交路径 dept/findById
+            data:{id:items[0].id},//提交的数据
+            success:function(data){//成功回调函数 data 响应的 数据
+                if(data){
+                    //绑定值
+                    $('#wu-form-role').form('load', data)//data就是要在表单中要回显的数据，自动进行回显 根据name值
+                }
+                else{
+                    $('#wu-dialog-role').dialog('close');//关闭模态
+                }
+            }
+        });
+        $('#wu-dialog-role').dialog({
+            closed: false,
+            modal:true,
+            title: "修改信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: edit//执行修改
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#wu-dialog-role').dialog('close');
+                }
+            }]
+        });
+    }
+
+    /**
+     * Name 分页过滤器
+     * data表格要展示的数据
+     */
+    function pagerFilter(data){
+
+        var dg = $(this);//当前表格
+        var opts = dg.datagrid('options');
+        var pager = dg.datagrid('getPager');//获取当前表格的分页对象
+        pager.pagination({
+            //当页码改变时会触发事件
+            onSelectPage:function(pageNum, pageSize){
+                //做分页时的请求参数
+                opts.pageNumber = pageNum;
+                opts.pageSize = pageSize;
+                //更改下面分页的页码
+                // dg.datagrid('loadData',data);
+                //使用表格自带的方法重载数据
+                dg.datagrid('load',{//自动从数据请求的ajax地址重新加载数据 附带把参数传进去
+                    pageNum:pageNum,
+                    pageSize:pageSize,
+                    name:$("#name").val()
+                });
+                pager.pagination('refresh',{pageNumber:pageNum,pageSize:pageSize});
+
+            }
+        });
+
+        return data;
+    }
+
+    /**
+     * Name 载入数据
+     */
+    $('#wu-datagrid-role').datagrid({
+        url:'role/page',
+        loadFilter:pagerFilter,
+        // rownumbers:true,
+        singleSelect:false,
+
+        pageSize:2,
+        pageList:[1,2,3,4,5],
+        pagination:true,//展示分页栏
+        // multiSort:true,
+        fitColumns:true,
+        fit:true,
+        columns:[[//列属性，指定数据表格的表头
+            { checkbox:true},
+            //title就是表格的表头，field就是json对象中的属性名称，必须跟展示的json数据中的属性名称一致，否则找不到数据
+            { field:'id',title:'角色编号',width:100,sortable:true},
+            { field:'name',title:'职位名称',width:180,sortable:true}
+            // { field:'tel',title:'部门座机',width:100}
+            // { field:'listprice',title:'操作',width:100},
+            // { field:'attr1',title:'attr1',width:100},
+            // { field:'itemid',title:'itemid',width:100},
+            // { field:'status',title:'status',width:100}
+        ]]
+    });
+</script>

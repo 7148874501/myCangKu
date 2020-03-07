@@ -1,0 +1,454 @@
+
+</html><div class="easyui-layout" data-options="fit:true">
+    <!-- Begin of toolbar -->
+    <div id="wu-toolbar-emp">
+        <div class="wu-toolbar-button">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="openAddemp()" plain="true">添加</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="openEditemp()" plain="true">修改</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="removeemp()" plain="true">删除</a>
+            <!--            <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="cancel()" plain="true">取消</a>-->
+            <a href="#" class="easyui-linkbutton" iconCls="icon-reload" onclick="reload()" plain="true">刷新</a>
+
+        </div>
+                <div class="wu-toolbar-search">
+                    <label>姓名:</label><input class="wu-text" style="width:100px" id="realName">
+                    <label>账号：</label><input class="wu-text" style="width:100px" id="username">
+                    <label>部门：</label>
+
+
+                        <input  class="easyui-combobox" id="deptName"
+                               data-options="valueField:'name',textField:'name',url:'dept/findAll'" value="请选择">
+
+                    <label>职位：</label><input class="wu-text" style="width:100px" id="roleNames">
+                                <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="empSearch">开始检索</a>
+                                    <script>
+                                    $(function () {
+                                        $("#empSearch").click(function () {
+                                            //当点击此按钮时，附带参数重载数据 表格 参数json
+                                            //也附带页码
+                                            $("#wu-datagrid-emp").datagrid('load',{//自动从数据请求的ajax地址重新加载数据 附带把参数传进去
+                                                pageNum:$("#wu-datagrid-emp").datagrid("options").pageNumber,
+                                                pageSize:$("#wu-datagrid-emp").datagrid("options").pageSize,
+                                                realName:$("#realName").val(),
+                                                username:$("#username").val(),
+                                                deptName:$('#deptName').combobox('getText').toString(),
+                                                roleNames:$("#roleNames").val()
+
+
+                                });
+                                console.log(4);
+
+                                console.log($('#deptName').combobox('getText'));
+                                console.log($('#deptName').combobox('getValue'));
+
+                                //console.log($('#deptName').combobox('getText'));获取多选框的值
+
+
+                            })
+                        })
+                        
+                        
+                        
+                    </script>
+                </div>
+    </div>
+    <!-- End of toolbar -->
+    <table id="wu-datagrid-emp" class="easyui-datagrid" toolbar="#wu-toolbar-emp"></table>
+</div>
+<!-- Begin of easyui-dialog -->
+<div id="wu-dialog-emp" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="width:400px; padding:10px;">
+    <form id="wu-form-emp" method="post">
+        <!--        隐藏的id做修改时要传到后台-->
+        <input type="hidden" name="id" class="wu-text" />
+        <table>
+            <tr>
+                <td width="120" align="right">姓名:</td>
+                <td><input type="text" name="realName" class="easyui-validatebox" data-options="required:true" /></td>
+            </tr>
+            <tr>
+                <td align="right">账号:</td>
+                <td><input type="text" name="username" class="easyui-validatebox" data-options="required:true,validType:'username'" /></td>
+            </tr>
+            <tr>
+                <td align="right">性别:</td><!--单选框-->
+                <td>
+
+                    <input type="radio" name="gender" value="0" >男
+
+
+                    <input type="radio" name="gender" value="1">女
+
+                </td>
+            </tr>
+            <tr>
+                <td align="right">联系电话:</td>
+                <td><input type="text" name="tel" class="easyui-validatebox" data-options="required:true,validType:'tel'" /></td>
+            </tr>
+            <tr>
+                <td align="right">邮箱:</td>
+                <td><input type="text" name="email" class="easyui-validatebox"  data-options="required:true,validType:'email'"/></td>
+            </tr>
+            <tr>
+                <td align="right">身份证号:</td>
+                <td><input type="text" name="idCardNo" class="easyui-validatebox" data-options="required:true,validType:'card'" /></td>
+            </tr>
+            <tr>
+                <td align="right">住址:</td>
+                <td><input type="text" name="address" class="easyui-validatebox" data-options="required:true" /></td>
+            </tr>
+            <tr>
+                <td align="right">部门回显:</td><!--回显的 下拉框-->
+                <td><input id="deptSelect" class="easyui-combobox" name="deptId"
+                           data-options="valueField:'id',textField:'name',url:'dept/findAll'" value="请选择"></td><!--//从后台得到值-->
+            </tr>
+            <tr>
+                <td align="right">职位:</td><!--回显的 多选框-->
+                <td id="ck_roles">
+
+                </td>
+            </tr>
+            <!--            <tr>-->
+            <!--                <td align="right">主 题:</td>-->
+            <!--                <td><input type="text" name="subject" class="wu-text" /></td>-->
+            <!--            </tr>-->
+            <!--            <tr>-->
+            <!--                <td valign="top" align="right">内 容:</td>-->
+            <!--                <td><textarea name="content" rows="6" class="wu-textarea" style="width:260px"></textarea></td>-->
+            <!--            </tr>-->
+        </table>
+    </form>
+    <script>
+        $.extend($.fn.validatebox.defaults.rules, {
+            tel:{
+                validator: function (value, param) {
+                    return /^(?:13\d|15\d|18\d)-?\d{5}(\d{3}|\*{3})$/.test(value);
+
+
+                },
+                message: '请输入正确的手机号'
+            },
+            username:{
+                validator: function (value, param) {
+                    return value.length > 5 && value.length <= 12;
+
+
+                },
+                message: '请输入5到12位的数字'
+            },
+            card:{
+                validator:function(value,param){
+                    return /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/.test(value);
+                },
+                message: '请输入正确的身份证号'
+
+            }
+
+        });
+    </script>
+    <script>
+        $(function () {
+            $.ajax({
+                url:'role/findAll',//从后台获取所以的角色id和名称
+                success:function (data) {//data是一个json数组
+                    console.log(data);
+                    $(data).each(function () {
+                        $('#ck_roles').html(
+                            $('#ck_roles').html()+"<input type='checkbox' name='roleIds' value='"+this.id+"'>"+'<span>'+this.name+'</span>'+'<br>'
+                        );
+
+                    });
+
+
+                }
+
+
+
+
+
+            });
+
+        })
+
+
+
+
+    </script>
+</div>
+<!-- End of easyui-dialog -->
+<script type="text/javascript">
+    /**
+     * Name 添加记录
+     */
+    function addemp(){
+        $('#wu-form-emp').form('submit', {
+            url:'emp/add',//提交的路径 emp/add
+            success:function(data){//提交成功之后的回调函数 data返回的数据 true
+                if(data=='true'){
+                    $.messager.alert('信息提示','提交成功！','info',function () {
+                        //当窗口关闭时触发该函数--更新表格
+                        $('#wu-datagrid-emp').datagrid('reload');
+                    });
+                    $('#wu-dialog-emp').dialog('close');
+                }
+                else
+                {
+                    $.messager.alert('信息提示','提交失败！','info');
+                }
+            }
+        });
+    }
+
+    /**
+     * Name 修改记录
+     */
+    function editemp(){
+        $('#wu-form-emp').form('submit', {
+            url:'emp/update',//修改路径
+            success:function(data){//响应数据
+                if(data=='true'){
+                    $.messager.alert('信息提示','提交成功！','info',function () {
+                        //当窗口关闭时触发该函数--更新表格
+                        $('#wu-datagrid-emp').datagrid('reload')
+                    });
+                    $('#wu-dialog-emp').dialog('close');
+
+
+
+                }
+                else
+                {
+                    $.messager.alert('信息提示','提交失败！','info');
+                }
+            }
+        });
+    }
+
+    /**
+     * Name 删除记录
+     */
+    function removeemp(){
+        var items = $('#wu-datagrid-emp').datagrid('getSelections');
+        if(items.length==0){
+            return;
+        }
+
+
+        $.messager.confirm('信息提示','确定要删除该记录？', function(result){//当点击确定时
+            if(result){
+                // var items = $('#wu-datagrid-emp').datagrid('getSelections');
+                // 获取要删除的所有id
+                var ids = [];
+                $(items).each(function(){
+                    ids.push(this.id);//数组的每一页 item把选中的行的id加入到ids数组中
+                });
+                //alert(ids);return;
+                console.log(ids);
+                $.ajax({
+                    url:'emp/remove',//emp/remove
+                    //ajax当请求参数是一个数组的时候，需要设置
+
+                    traditional:true,//在servlet中这个属性默认是false 在传递数组是不允许绑定的 该为true
+                    data:{ids:ids},//ids是name ids是个数组值
+                    success:function(data){
+                        if(data){
+                            $.messager.alert('信息提示','删除成功！','info',function () {
+                                //当窗口关闭时触发该函数--更新表格
+                                $('#wu-datagrid-emp').datagrid('reload')
+                            });
+                        }
+                        else
+                        {
+                            $.messager.alert('信息提示','删除失败！','info');
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Name 打开添加窗口
+     */
+    function openAddemp(){
+
+        //easyui的表单功能--清楚表单数据
+        $('#wu-form-emp').form('clear');
+        //easyui的dialog功能--把第为wu-dialog-emp的组件作为easyuid的窗口来定义了
+        $('#wu-dialog-emp').dialog({
+            //false 不关闭--显示窗口
+            closed: false,
+            //定义窗口是不是模态窗口。true是false不是
+            //窗口模态: 当展示该窗口时，只能操作该窗口的内容，其他地方无法操作（无法获取焦点）
+            modal:true,
+            // 窗口的标题文本
+            title: "添加信息",
+            //数组，按钮 每一个按钮有json对象来定义
+            buttons: [{//确定按钮
+                text: '确定',
+                iconCls: 'icon-ok',//class
+                handler: addemp//类型function，用于处理点击该 图标以后的动作 相当于onclick
+            }, {//取消按钮
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+
+                    //关闭 模态框
+                    $('#wu-dialog-emp').dialog('close');
+                }
+            }]
+        });
+    }
+
+    /**
+     * Name 打开修改窗口
+     */
+    function openEditemp(){
+        $('#wu-form-emp').form('clear');
+        //getSelections none 返回所有选中的行，当没有选中的记录时，将返回空数组。
+        // var item = $('#wu-datagrid-emp').datagrid('getSelected');
+        var items=$('#wu-datagrid-emp').datagrid('getSelections');
+        console.log(items);
+        if (items.length==0){
+            //请选择要修改的数据--没有任何效果
+            $.messager.alert('信息提示','请选择要修改的数据！','warning');
+            return;
+
+        }else if(items.length>1){
+            //提示一次只能修改一次数据
+            $.messager.alert('信息提示','一次修改一条数据！','warning');
+            return;
+
+        }
+        //直接给表单进行回显 使用勾选中的data
+        // $('#wu-form-emp').form('load',items[0]);
+
+        // alert(item.productid);return;
+        $.ajax({//ajax回显
+            url:'emp/findById',//提交路径 emp/findById
+            data:{id:items[0].id},//提交的数据
+            success:function(data){//成功回调函数 data 响应的 数据
+                if(data){
+                    console.log(data);
+                    //绑定值
+                    $('#wu-form-emp').form('load', data)//data就是要在表单中要回显的数据，自动进行回显 根据name值
+               //回显多选框选中data.roleNames 是一个字符串 多个role使用，拼接起来的，先拆分成一个数组
+var roleNames=data.roleNames.split(",");
+                    for (var i=0;i<roleNames.length;i++){
+                        //找到含有该文件的span上一个多选框 设置为选中
+                        $("span:contains('"+roleNames[i]+"')").prev("input:checkbox").attr("checked","checked");
+
+                    }
+                    //做一个选中部门
+                    $.ajax({
+                        url:'dept/findAll'
+                        ,success:function (deptData) {
+                            console.log(deptData);
+                            console.log(deptData);
+                            $.each(deptData,function () {
+                                if(this.name==data.deptName){
+                                    $('#deptSelect').combobox('select',this.id);
+                                }
+                            })
+                        }
+
+
+
+
+                    });
+
+
+                }
+                else{
+                    $('#wu-dialog-emp').dialog('close');//关闭模态
+                }
+            }
+        });
+        $('#wu-dialog-emp').dialog({
+            closed: false,
+            modal:true,
+            title: "修改信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: editemp//执行修改
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#wu-dialog-emp').dialog('close');
+                }
+            }]
+        });
+    }
+
+    /**
+     * Name 分页过滤器
+     * data表格要展示的数据
+     */
+    function pagerFilter(data){
+
+        var dg = $(this);//当前表格
+        var opts = dg.datagrid('options');
+        var pager = dg.datagrid('getPager');//获取当前表格的分页对象
+        pager.pagination({
+            //当页码改变时会触发事件
+            onSelectPage:function(pageNum, pageSize){
+                //做分页时的请求参数
+                opts.pageNumber = pageNum;
+                opts.pageSize = pageSize;
+                //更改下面分页的页码
+                // dg.datagrid('loadData',data);
+                //使用表格自带的方法重载数据
+                dg.datagrid('load',{//自动从数据请求的ajax地址重新加载数据 附带把参数传进去
+                    pageNum:pageNum,
+                    pageSize:pageSize,
+                    realName:$("#realName").val(),
+                    username:$("#username").val(),
+                    deptName:$('#deptName').combobox('getText').toString(),
+                    roleNames:$("#roleNames").val()
+                });
+                pager.pagination('refresh',{pageNumber:pageNum,pageSize:pageSize});
+
+            }
+        });
+
+        return data;
+    }
+
+    /**
+     * Name 载入数据
+     */
+    $('#wu-datagrid-emp').datagrid({
+        url:'emp/page',
+        loadFilter:pagerFilter,
+        // rownumbers:true,
+        singleSelect:false,
+        pageSize:2,
+        pageList:[1,2,3,4,5],
+        pagination:true,//展示分页栏
+        // multiSort:true,
+        fitColumns:true,
+        fit:true,
+        columns:[[//列属性，指定数据表格的表头
+            { checkbox:true},
+            //title就是表格的表头，field就是json对象中的属性名称，必须跟展示的json数据中的属性名称一致，否则找不到数据
+            { field:'id',title:'员工编号',width:100,sortable:true},
+            { field:'realName',title:'真实姓名',width:180,sortable:true},
+            { field:'username',title:'账号',width:100},
+            { field:'gender',title:'性别',width:100,formatter:function(value,row) {
+if (value==0){
+    return '男'
+}else {
+    return '女'
+}
+    }},
+            { field:'tel',title:'联系电话',width:100},
+            { field:'email',title:'邮箱',width:100},
+            { field:'birthDate',title:'生日',width:100},
+            { field:'address',title:'住址',width:100},
+            { field:'idCardNo',title:'身份证 ',width:100},//身份证一般在详情页
+            { field:'roleNames',title:'职位',width:100},
+            { field:'deptName',title:'部门',width:100}
+        ]]
+    });
+</script>

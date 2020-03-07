@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erp.mapper.EmpMapper">
+<!--    List<EmpVo>page(@Param("wheres") EmpVo wheres,@Param("start")
+ int start,@Param("pageSize") int pageSize);-->
+    <resultMap id="empVoMap" type="com.erp.vo.EmpVo">
+        <id property="id" column="id"></id>
+        <result property="username" column="username"></result>
+        <result property="tel" column="tel"></result>
+        <result property="idCardNo" column="id_card_no"></result>
+        <result property="realName" column="real_name"></result>
+        <result property="gender" column="gender"></result>
+        <result property="email" column="email"></result>
+        <result property="address" column="address"></result>
+        <result property="birthDate" column="birth_date"></result>
+        <result property="deptName" column="dept_name"></result>
+        <result property="roleNames" column="role_names"></result>
+    </resultMap>
+    <sql id="havingWheres">
+<if test="wheres.realName!=null and wheres.realName!=''">
+    and e.real_name like '%${wheres.realName}%'
+</if>
+<if test="wheres.username!=null and wheres.username!=''">
+    and e.username like '%${wheres.username}%'
+</if>
+<if test="wheres.deptName!=null and wheres.deptName!=''">
+    and dept_name like  '%${wheres.deptName}%'
+</if>
+<if test="wheres.roleNames!=null and wheres.roleNames!=''">
+    and role_names like '%${wheres.roleNames}%'
+</if>
+    </sql>
+    <sql id="selectResult">
+       SELECT  e.*,d.`name` dept_name,GROUP_CONCAT(r.`name` SEPARATOR ',') role_names FROM emp e
+LEFT JOIN dept d ON e.dept_id=d.id
+LEFT JOIN emp_role er ON e.id=er.emp_id
+LEFT JOIN role r ON er.role_id=r.id
+GROUP BY e.id
+
+
+    </sql>
+    <select id="page" resultMap="empVoMap">
+        <include refid="selectResult"/>
+        having 1=1
+        <include refid="havingWheres"/>
+        order by e.id desc
+        limit #{start},#{pageSize}
+    </select>
+    <select id="count" resultType="int">
+select count(r.id) from (
+<include refid="selectResult"/>
+having 1=1
+<include refid="havingWheres"/>
+) r
+    </select>
+    <insert id="add">
+        INSERT INTO `emp` (`id`, `username`, `password`, `tel`, `id_card_no`, `real_name`, `gender`, `email`, `address`, `birth_date`, `dept_id`)  VALUES (NULL,#{emp.username},#{emp.password},#{emp.tel},#{emp.idCardNo},#{emp.realName},#{emp.gender},#{emp.email},#{emp.address},#{emp.birthDate},#{emp.deptId})
+    </insert>
+    <select id="findById" resultMap="empVoMap">
+        <include refid="selectResult"/>
+        having e.id=#{id}
+    </select>
+    <update id="update">
+        update emp set real_name=#{emp.realName},birth_date=#{emp.birthDate},gender=#{emp.gender},tel=#{emp.tel}
+        ,address=#{emp.address},dept_id=#{emp.deptId},id_card_no=#{emp.idCardNo},email=#{emp.email}
+where id=#{emp.id}
+    </update>
+    <delete id="remove">
+delete from `emp` where id in
+<foreach collection="ids" item="id" open="(" close=")" separator=",">
+    #{id}
+</foreach>
+
+    </delete>
+    <select id="getkey" resultType="int">
+        SELECT LAST_INSERT_ID();
+    </select>
+    <select id="login" resultType="com.erp.pojo.Emp">
+select emp.*,id_card_no idCardNo,real_name realname,birth_date birthDate
+from emp where username=#{username} and password=#{password}
+    </select>
+
+
+</mapper>
+<!--    /**查询总数-->
+<!--    *-->
+<!--    * @param wheres 查询条件-->
+<!--    * @return-->
+<!--    */-->
+<!--    int count(@Param("wheres") EmpVo wheres);-->
+
+<!--    /**-->
+<!--    * 增加-->
+<!--    * @param emp-->
+<!--    */-->
+
+<!--    void add(@Param("emp") Emp emp);-->
+
+<!--    /**-->
+<!--    * 修改-->
+<!--    * @param emp-->
+<!--    */-->
+<!--    void update(@Param("emp") Emp emp);-->
+
+<!--    /**-->
+<!--    * 根据id查找vo-->
+<!--    * @param id-->
+<!--    * @return-->
+<!--    */-->
+
+<!--    EmpVo findById(@Param("id") int id);-->
+<!--    -->

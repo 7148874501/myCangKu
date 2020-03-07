@@ -1,0 +1,30 @@
+[{
+  "id":1,
+  "text":"后台管理",
+  "iconCls":"icon-application-cascade",
+  "children":[{
+    "text":"部门管理",
+    "iconCls":"icon-chart-organisation",
+    "checked":true
+  },{
+    "text":"员工管理",
+    "iconCls":"icon-users",
+    "state":"open"
+
+    },
+  {
+      "text":"角色管理",
+    "iconCls":"icon-user-group",
+    "state": "open"
+
+
+  }]
+},{
+  "text":"仓库管理",
+  "state":"closed",
+  "children":[{
+    "text":"Java"
+  },{
+    "text":"C#"
+  }]
+}]

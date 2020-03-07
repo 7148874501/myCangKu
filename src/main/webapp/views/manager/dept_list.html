@@ -1,0 +1,290 @@
+<div class="easyui-layout" data-options="fit:true">
+    <!-- Begin of toolbar -->
+    <div id="wu-toolbar-dept">
+        <div class="wu-toolbar-button">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="openAdddept()" plain="true">添加</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="openEditdept()" plain="true">修改</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="removedept()" plain="true">删除</a>
+<!--            <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="cancel()" plain="true">取消</a>-->
+            <a href="#" class="easyui-linkbutton" iconCls="icon-reload" onclick="reload()" plain="true">刷新</a>
+
+        </div>
+<!--        <div class="wu-toolbar-search">-->
+<!--            <label>起始时间：</label><input class="easyui-datebox" style="width:100px">-->
+<!--            <label>结束时间：</label><input class="easyui-datebox" style="width:100px">-->
+<!--            <label>用户组：</label>-->
+<!--            <select class="easyui-combobox" panelHeight="auto" style="width:100px">-->
+<!--                <option value="0">选择用户组</option>-->
+<!--                <option value="1">黄钻</option>-->
+<!--                <option value="2">红钻</option>-->
+<!--                <option value="3">蓝钻</option>-->
+<!--            </select>-->
+<!--            <label>关键词：</label><input class="wu-text" style="width:100px">-->
+<!--            <a href="#" class="easyui-linkbutton" iconCls="icon-search">开始检索</a>-->
+<!--        </div>-->
+    </div>
+    <!-- End of toolbar -->
+    <table id="wu-datagrid-dept" class="easyui-datagrid" toolbar="#wu-toolbar-dept"></table>
+</div>
+<!-- Begin of easyui-dialog -->
+<div id="wu-dialog-dept" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="width:400px; padding:10px;">
+    <form id="wu-form-dept" method="post">
+<!--        隐藏的id做修改时要传到后台-->
+        <input type="hidden" name="id" class="wu-text" />
+        <table>
+            <tr>
+                <td width="160" align="right">部 门 名 称:</td>
+                <td><input type="text" name="name" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">部 门 座 机:</td>
+                <td><input type="text" name="tel" class="wu-text" /></td>
+            </tr>
+<!--            <tr>-->
+<!--                <td align="right">主 题:</td>-->
+<!--                <td><input type="text" name="subject" class="wu-text" /></td>-->
+<!--            </tr>-->
+<!--            <tr>-->
+<!--                <td valign="top" align="right">内 容:</td>-->
+<!--                <td><textarea name="content" rows="6" class="wu-textarea" style="width:260px"></textarea></td>-->
+<!--            </tr>-->
+        </table>
+    </form>
+</div>
+<!-- End of easyui-dialog -->
+<script type="text/javascript">
+    /**
+     * Name 添加记录
+     */
+    function adddept(){
+        $('#wu-form-dept').form('submit', {
+            url:'dept/add',//提交的路径 dept/add
+            success:function(data){//提交成功之后的回调函数 data返回的数据 true
+                if(data=='true'){
+                    $.messager.alert('信息提示','提交成功！','info',function () {
+                        //当窗口关闭时触发该函数--更新表格
+                        $('#wu-datagrid-dept').datagrid('reload');
+                    });
+                    $('#wu-dialog-dept').dialog('close');
+                }
+                else
+                {
+                    $.messager.alert('信息提示','提交失败！','info');
+                }
+            }
+        });
+    }
+
+    /**
+     * Name 修改记录
+     */
+    function editdept(){
+        $('#wu-form-dept').form('submit', {
+            url:'dept/update',//修改路径
+            success:function(data){//响应数据
+                if(data=='true'){
+                    $.messager.alert('信息提示','提交成功！','info',function () {
+                        //当窗口关闭时触发该函数--更新表格
+                        $('#wu-datagrid-dept').datagrid('reload')
+                    });
+                    $('#wu-dialog-dept').dialog('close');
+                    
+
+
+                }
+                else
+                {
+                    $.messager.alert('信息提示','提交失败！','info');
+                }
+            }
+        });
+    }
+
+    /**
+     * Name 删除记录
+     */
+    function removedept(){
+        var items = $('#wu-datagrid-dept').datagrid('getSelections');
+        if(items.length==0){
+return;
+        }
+
+
+        $.messager.confirm('信息提示','确定要删除该记录？', function(result){//当点击确定时
+            if(result){
+                // var items = $('#wu-datagrid-dept').datagrid('getSelections');
+                // 获取要删除的所有id
+                var ids = [];
+                $(items).each(function(){
+                    ids.push(this.id);//数组的每一页 item把选中的行的id加入到ids数组中
+                });
+                //alert(ids);return;
+                console.log(ids);
+                $.ajax({
+                    url:'dept/remove',//dept/remove
+                    //ajax当请求参数是一个数组的时候，需要设置
+
+                    traditional:true,//在servlet中这个属性默认是false 在传递数组是不允许绑定的 该为true
+                    data:{ids:ids},//ids是name ids是个数组值
+                    success:function(data){
+                        if(data){
+                            $.messager.alert('信息提示','删除成功！','info',function () {
+                                //当窗口关闭时触发该函数--更新表格
+                                $('#wu-datagrid-dept').datagrid('reload')
+                            });
+                        }
+                        else
+                        {
+                            $.messager.alert('信息提示','删除失败！','info');
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Name 打开添加窗口
+     */
+    function openAdddept(){
+
+        //easyui的表单功能--清楚表单数据
+          $('#wu-form-dept').form('clear');
+          //easyui的dialog功能--把第为wu-dialog-dept的组件作为easyuid的窗口来定义了
+        $('#wu-dialog-dept').dialog({
+            //false 不关闭--显示窗口
+            closed: false,
+            //定义窗口是不是模态窗口。true是false不是
+            //窗口模态: 当展示该窗口时，只能操作该窗口的内容，其他地方无法操作（无法获取焦点）
+            modal:true,
+            // 窗口的标题文本
+            title: "添加信息",
+            //数组，按钮 每一个按钮有json对象来定义
+            buttons: [{//确定按钮
+                text: '确定',
+                iconCls: 'icon-ok',//class
+                handler: adddept//类型function，用于处理点击该 图标以后的动作 相当于onclick
+            }, {//取消按钮
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+
+                    //关闭 模态框
+                    $('#wu-dialog-dept').dialog('close');
+                }
+            }]
+        });
+    }
+
+    /**
+     * Name 打开修改窗口
+     */
+    function openEditdept(){
+        $('#wu-form-dept').form('clear');
+        //getSelections none 返回所有选中的行，当没有选中的记录时，将返回空数组。
+        // var item = $('#wu-datagrid-dept').datagrid('getSelected');
+        var items=$('#wu-datagrid-dept').datagrid('getSelections');
+        console.log(items);
+        if (items.length==0){
+            //请选择要修改的数据--没有任何效果
+            $.messager.alert('信息提示','请选择要修改的数据！','warning');
+            return;
+
+        }else if(items.length>1){
+            //提示一次只能修改一次数据
+            $.messager.alert('信息提示','一次修改一条数据！','warning');
+            return;
+
+        }
+        //直接给表单进行回显 使用勾选中的data
+        // $('#wu-form-dept').form('load',items[0]);
+
+        // alert(item.productid);return;
+        $.ajax({//ajax回显
+            url:'dept/findById',//提交路径 dept/findById
+             data:{id:items[0].id},//提交的数据
+            success:function(data){//成功回调函数 data 响应的 数据
+                if(data){
+                    //绑定值
+                    $('#wu-form-dept').form('load', data)//data就是要在表单中要回显的数据，自动进行回显 根据name值
+                }
+                else{
+                    $('#wu-dialog-dept').dialog('close');//关闭模态
+                }
+            }
+        });
+        $('#wu-dialog-dept').dialog({
+            closed: false,
+            modal:true,
+            title: "修改信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: editdept//执行修改
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#wu-dialog-dept').dialog('close');
+                }
+            }]
+        });
+    }
+
+    /**
+     * Name 分页过滤器
+     * data表格要展示的数据
+     */
+    function pagerFilter(data){
+
+        var dg = $(this);//当前表格
+        var opts = dg.datagrid('options');
+        var pager = dg.datagrid('getPager');//获取当前表格的分页对象
+        pager.pagination({
+            //当页码改变时会触发事件
+            onSelectPage:function(pageNum, pageSize){
+                //做分页时的请求参数
+                opts.pageNumber = pageNum;
+                opts.pageSize = pageSize;
+                //更改下面分页的页码
+                // dg.datagrid('loadData',data);
+                //使用表格自带的方法重载数据
+               dg.datagrid('load',{//自动从数据请求的ajax地址重新加载数据 附带把参数传进去
+                    pageNum:pageNum,
+                   pageSize:pageSize
+                });
+                pager.pagination('refresh',{pageNumber:pageNum,pageSize:pageSize});
+
+            }
+        });
+
+        return data;
+    }
+
+    /**
+     * Name 载入数据
+     */
+    $('#wu-datagrid-dept').datagrid({
+        url:'dept/page',
+        loadFilter:pagerFilter,
+        // rownumbers:true,
+        singleSelect:false,
+        pageSize:2,
+        pageList:[1,2,3,4,5],
+        pagination:true,//展示分页栏
+        // multiSort:true,
+        fitColumns:true,
+        fit:true,
+        columns:[[//列属性，指定数据表格的表头
+            { checkbox:true},
+            //title就是表格的表头，field就是json对象中的属性名称，必须跟展示的json数据中的属性名称一致，否则找不到数据
+            { field:'id',title:'部门编号',width:100,sortable:true},
+            { field:'name',title:'部门名称',width:180,sortable:true},
+            { field:'tel',title:'部门座机',width:100}
+            // { field:'listprice',title:'操作',width:100},
+            // { field:'attr1',title:'attr1',width:100},
+            // { field:'itemid',title:'itemid',width:100},
+            // { field:'status',title:'status',width:100}
+        ]]
+    });
+</script>
