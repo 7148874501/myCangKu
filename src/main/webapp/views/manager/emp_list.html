@@ -17,13 +17,24 @@
 
 
                         <input  class="easyui-combobox" id="deptName"
-                               data-options="valueField:'name',textField:'name',url:'dept/findAll'" value="请选择">
+                               data-options="valueField:'name',textField:'name',url:'dept/findAll'" >
 
-                    <label>职位：</label><input class="wu-text" style="width:100px" id="roleNames">
+<!--                    <label>职位：</label><input class="wu-text" style="width:100px" id="roleNames">-->
+                    <label>职位：</label><span id="box"></span>
                                 <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="empSearch">开始检索</a>
                                     <script>
                                     $(function () {
                                         $("#empSearch").click(function () {
+                                            var res=[];
+                                            $('#box input:checkbox').each(function () {
+                                                if (this.checked){
+                                                    res.push(this.value);
+
+                                                }
+
+                                            })
+
+
                                             //当点击此按钮时，附带参数重载数据 表格 参数json
                                             //也附带页码
                                             $("#wu-datagrid-emp").datagrid('load',{//自动从数据请求的ajax地址重新加载数据 附带把参数传进去
@@ -32,10 +43,12 @@
                                                 realName:$("#realName").val(),
                                                 username:$("#username").val(),
                                                 deptName:$('#deptName').combobox('getText').toString(),
-                                                roleNames:$("#roleNames").val()
+                                                roleNames:res.toString()
+
 
 
                                 });
+                                            console.log(res.toString());
                                 console.log(4);
 
                                 console.log($('#deptName').combobox('getText'));
@@ -49,6 +62,35 @@
                         
                         
                         
+                    </script>
+                    <script>
+                        $(function () {
+                            $.ajax({
+                                url:'role/findAll',//从后台获取所以的角色id和名称
+                                success:function (data) {//data是一个json数组
+                                    console.log(data);
+                                    $(data).each(function () {
+                                        $('#box').html(
+                                            $('#box').html()+"<input type='checkbox' name='roleNames' value='"+this.name+"'>"+'<span>'+this.name+'</span>'
+                                        );
+                                        console.log("5");
+
+                                    });
+
+
+                                }
+
+
+
+
+
+                            });
+
+                        })
+
+
+
+
                     </script>
                 </div>
     </div>
@@ -405,7 +447,7 @@ var roleNames=data.roleNames.split(",");
                     realName:$("#realName").val(),
                     username:$("#username").val(),
                     deptName:$('#deptName').combobox('getText').toString(),
-                    roleNames:$("#roleNames").val()
+                    roleNames:res.toString()
                 });
                 pager.pagination('refresh',{pageNumber:pageNum,pageSize:pageSize});
 

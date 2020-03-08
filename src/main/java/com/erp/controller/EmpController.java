@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+
 @RestController
 @RequestMapping("emp")
 public class EmpController {
@@ -48,6 +50,9 @@ public class EmpController {
 @RequestMapping("page")
     public EasyUiResultUtil<EmpVo> page(EmpVo wheres, @RequestParam(defaultValue = "1") int pageNum,
                                         @RequestParam(defaultValue = "2") int pageSize){
+
+
+        System.out.println("职位名称"+wheres.getRoleNames());
         return  empService.page(wheres, pageNum, pageSize);
 
     }

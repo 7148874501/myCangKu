@@ -14,6 +14,7 @@ import com.erp.vo.EmpVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -53,6 +54,7 @@ public class EmpServiceImpl implements EmpService {
 
     @Override
     public EmpVo findById(int id) {
+
         return empMapper.findById(id);
     }
 
@@ -80,8 +82,14 @@ public class EmpServiceImpl implements EmpService {
 
     @Override
     public EasyUiResultUtil<EmpVo> page(EmpVo wheres, int pageNum, int pageSize) {
-        List<EmpVo> page=empMapper.page(wheres, (pageNum-1)*pageSize, pageSize);
-        int count=empMapper.count(wheres);
+        String []roleNames = wheres.getRoleNames()!=null? wheres.getRoleNames().split(","):null;
+      System.out.println(Arrays.toString(roleNames));
+
+
+
+
+        List<EmpVo> page=empMapper.page(wheres,roleNames, (pageNum-1)*pageSize, pageSize );
+        int count=empMapper.count(roleNames,wheres);
 
 
 

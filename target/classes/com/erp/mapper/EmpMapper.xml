@@ -3,8 +3,8 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.erp.mapper.EmpMapper">
-<!--    List<EmpVo>page(@Param("wheres") EmpVo wheres,@Param("start")
- int start,@Param("pageSize") int pageSize);-->
+    <!--    List<EmpVo>page(@Param("wheres") EmpVo wheres,@Param("start")
+     int start,@Param("pageSize") int pageSize);-->
     <resultMap id="empVoMap" type="com.erp.vo.EmpVo">
         <id property="id" column="id"></id>
         <result property="username" column="username"></result>
@@ -19,18 +19,20 @@
         <result property="roleNames" column="role_names"></result>
     </resultMap>
     <sql id="havingWheres">
-<if test="wheres.realName!=null and wheres.realName!=''">
-    and e.real_name like '%${wheres.realName}%'
-</if>
-<if test="wheres.username!=null and wheres.username!=''">
-    and e.username like '%${wheres.username}%'
-</if>
-<if test="wheres.deptName!=null and wheres.deptName!=''">
-    and dept_name like  '%${wheres.deptName}%'
-</if>
-<if test="wheres.roleNames!=null and wheres.roleNames!=''">
-    and role_names like '%${wheres.roleNames}%'
-</if>
+        <if test="wheres.realName!=null and wheres.realName!=''">
+            and e.real_name like '%${wheres.realName}%'
+        </if>
+        <if test="wheres.username!=null and wheres.username!=''">
+            and e.username like '%${wheres.username}%'
+        </if>
+        <if test="wheres.deptName!=null and wheres.deptName!=''">
+            and dept_name like '%${wheres.deptName}%'
+        </if>
+        <if test="roleNames!=null">
+            <foreach collection="roleNames" item="roleName">
+                and role_names like '%${roleName}%'
+            </foreach>
+        </if>
     </sql>
     <sql id="selectResult">
        SELECT  e.*,d.`name` dept_name,GROUP_CONCAT(r.`name` SEPARATOR ',') role_names FROM emp e
@@ -49,11 +51,11 @@ GROUP BY e.id
         limit #{start},#{pageSize}
     </select>
     <select id="count" resultType="int">
-select count(r.id) from (
-<include refid="selectResult"/>
-having 1=1
-<include refid="havingWheres"/>
-) r
+        select count(r.id) from (
+        <include refid="selectResult"/>
+        having 1=1
+        <include refid="havingWheres"/>
+        ) r
     </select>
     <insert id="add">
         INSERT INTO `emp` (`id`, `username`, `password`, `tel`, `id_card_no`, `real_name`, `gender`, `email`, `address`, `birth_date`, `dept_id`)  VALUES (NULL,#{emp.username},#{emp.password},#{emp.tel},#{emp.idCardNo},#{emp.realName},#{emp.gender},#{emp.email},#{emp.address},#{emp.birthDate},#{emp.deptId})
@@ -68,10 +70,10 @@ having 1=1
 where id=#{emp.id}
     </update>
     <delete id="remove">
-delete from `emp` where id in
-<foreach collection="ids" item="id" open="(" close=")" separator=",">
-    #{id}
-</foreach>
+        delete from `emp` where id in
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
 
     </delete>
     <select id="getkey" resultType="int">
@@ -84,31 +86,31 @@ from emp where username=#{username} and password=#{password}
 
 
 </mapper>
-<!--    /**查询总数-->
-<!--    *-->
-<!--    * @param wheres 查询条件-->
-<!--    * @return-->
-<!--    */-->
-<!--    int count(@Param("wheres") EmpVo wheres);-->
+        <!--    /**查询总数-->
+        <!--    *-->
+        <!--    * @param wheres 查询条件-->
+        <!--    * @return-->
+        <!--    */-->
+        <!--    int count(@Param("wheres") EmpVo wheres);-->
 
-<!--    /**-->
-<!--    * 增加-->
-<!--    * @param emp-->
-<!--    */-->
+        <!--    /**-->
+        <!--    * 增加-->
+        <!--    * @param emp-->
+        <!--    */-->
 
-<!--    void add(@Param("emp") Emp emp);-->
+        <!--    void add(@Param("emp") Emp emp);-->
 
-<!--    /**-->
-<!--    * 修改-->
-<!--    * @param emp-->
-<!--    */-->
-<!--    void update(@Param("emp") Emp emp);-->
+        <!--    /**-->
+        <!--    * 修改-->
+        <!--    * @param emp-->
+        <!--    */-->
+        <!--    void update(@Param("emp") Emp emp);-->
 
-<!--    /**-->
-<!--    * 根据id查找vo-->
-<!--    * @param id-->
-<!--    * @return-->
-<!--    */-->
+        <!--    /**-->
+        <!--    * 根据id查找vo-->
+        <!--    * @param id-->
+        <!--    * @return-->
+        <!--    */-->
 
-<!--    EmpVo findById(@Param("id") int id);-->
-<!--    -->
+        <!--    EmpVo findById(@Param("id") int id);-->
+        <!--    -->

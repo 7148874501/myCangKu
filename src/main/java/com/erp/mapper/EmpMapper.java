@@ -16,14 +16,14 @@ public interface EmpMapper {
      * @return
      */
 
-    List<EmpVo>page(@Param("wheres") EmpVo wheres,@Param("start") int start,@Param("pageSize") int pageSize);
+    List<EmpVo>page(@Param("wheres") EmpVo wheres,@Param("roleNames") String[]roleNames, @Param("start") int start,@Param("pageSize") int pageSize);
 
     /**查询总数
      *
      * @param wheres 查询条件
      * @return
      */
-    int count(@Param("wheres") EmpVo wheres);
+    int count(@Param("roleNames") String[]roleNames,@Param("wheres") EmpVo wheres);
 
     /**
      * 增加
